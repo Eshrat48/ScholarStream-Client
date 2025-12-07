@@ -1,0 +1,58 @@
+/* Global animations and small helpers used by Navbar and Footer */
+
+@keyframes fadeUp {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 480ms ease both; }
+
+@keyframes floaty {
+	0% { transform: translateY(0); }
+	50% { transform: translateY(-6px); }
+	100% { transform: translateY(0); }
+}
+.floating { animation: floaty 6s ease-in-out infinite; }
+
+@keyframes shimmer {
+	0% { background-position: 0% 0%; }
+	50% { background-position: 100% 0%; }
+	100% { background-position: 0% 0%; }
+}
+.shimmer-text {
+	background: linear-gradient(90deg,#0f172a 0%, #0f172a 48%, #06b6d4 52%, #0f172a 100%);
+	background-size: 200% 100%;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	animation: shimmer 3s linear infinite;
+}
+
+.logo-badge { display: inline-flex; align-items: center; gap: 0.5rem; }
+.logo-badge .badge { transition: transform .28s cubic-bezier(.2,.9,.2,1), box-shadow .28s ease; }
+.logo-badge:hover .badge { transform: translateY(-4px) scale(1.03); box-shadow: 0 14px 40px rgba(30,64,175,0.12); }
+
+.btn-gradient {
+	background: linear-gradient(90deg,#2563eb,#06b6d4);
+	background-size: 200% 200%;
+	color: #fff;
+	animation: shimmer 4s ease infinite;
+}
+.btn-gradient:hover { filter: brightness(1.03); }
+
+.dropdown-pop { transform-origin: top right; animation: fadeUp .18s ease both; }
+
+/* small utility for subtle icon hover */
+.icon-hover:hover { transform: translateY(-3px); transition: transform .22s ease; }
+
+/* Footer link animation and hover */
+.footer-link {
+	color: #4b5563; /* gray-600 */
+	display: inline-block;
+	transition: color .18s ease, transform .18s ease;
+}
+.footer-link:hover {
+	color: #2563eb; /* blue-600 */
+	transform: translateY(-4px);
+}
+
+/* small stagger helper (optional) */
+.fade-up[data-delay] { animation-delay: var(--delay, 0ms); }
