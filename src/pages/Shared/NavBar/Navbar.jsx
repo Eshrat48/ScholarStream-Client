@@ -14,7 +14,7 @@ const Navbar = () => {
     };
 
     return (
-        <div className="bg-gray-50 py-6">
+        <div className="sticky top-0 z-50 py-6">
             <div className="mx-auto max-w-6xl bg-white shadow-xl rounded-xl px-6 py-3 flex items-center justify-between transition-shadow duration-300 hover:shadow-2xl">
                 {/* Left: Logo */}
                 <div className="flex items-center gap-3">
@@ -71,8 +71,6 @@ const Navbar = () => {
                     )}
                 </div>
             </div>
-
-            <hr className="border-t border-gray-200" />
         </div>
     );
 };
