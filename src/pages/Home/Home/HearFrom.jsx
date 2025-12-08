@@ -61,7 +61,7 @@ const HearFrom = () => {
     };
 
     return (
-        <section className="bg-gray-50 py-16 lg:py-20">
+        <section className=" py-16 lg:py-20">
             <div className="mx-auto max-w-6xl px-4 lg:px-8">
                 {/* Section Title */}
                 <motion.div

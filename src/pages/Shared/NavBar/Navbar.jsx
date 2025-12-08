@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { FaBookOpen } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 
@@ -18,30 +19,30 @@ const Navbar = () => {
             <div className="mx-auto max-w-6xl bg-white shadow-xl rounded-xl px-6 py-3 flex items-center justify-between transition-shadow duration-300 hover:shadow-2xl">
                 {/* Left: Logo */}
                 <div className="flex items-center gap-3">
-                    <div className="logo-badge cursor-pointer fade-up">
+                    <Link to="/" className="logo-badge cursor-pointer fade-up">
                         <div className="badge w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white">
                             <FaBookOpen className="w-5 h-5" />
                         </div>
-                        <a className="text-black text-xl font-bold shimmer-text">ScholarStream</a>
-                    </div>
+                        <span className="text-black text-xl font-bold shimmer-text">ScholarStream</span>
+                    </Link>
                 </div>
 
                 {/* Center: Links (visible on md+) */}
                 <div className="hidden md:flex gap-8 items-center">
-                    <a className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Home</a>
-                    <a className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">All Scholarships</a>
+                    <Link to="/" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Home</Link>
+                    <Link to="/all-scholarships" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">All Scholarships</Link>
                 </div>
 
                 {/* Right: Auth buttons or user profile */}
                 <div className="flex items-center gap-3">
                     {!isLoggedIn ? (
                             <>
-                            <button className="btn-gradient rounded-full px-5 py-2 text-base font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-150">
+                            <Link to="/register" className="btn-gradient rounded-full px-5 py-2 text-base font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-150">
                                 Register
-                            </button>
-                            <button className="bg-gray-100 text-black rounded-full px-5 py-2 text-base font-medium hover:bg-gray-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-150">
+                            </Link>
+                            <Link to="/login" className="bg-gray-100 text-black rounded-full px-5 py-2 text-base font-medium hover:bg-gray-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-150">
                                 Login
-                            </button>
+                            </Link>
                         </>
                     ) : (
                         <div className="relative">
