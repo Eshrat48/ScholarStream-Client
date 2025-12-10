@@ -13,6 +13,7 @@ import PaymentFailed from "../pages/PaymentFailed.jsx";
 import MyProfile from "../pages/Dashboard/MyProfile.jsx";
 import MyApplications from "../pages/Dashboard/MyApplications.jsx";
 import MyReviews from "../pages/Dashboard/MyReviews.jsx";
+import AddScholarship from "../pages/Dashboard/AddScholarship.jsx";
 import PrivateRoute from "../components/PrivateRoute.jsx";
 import { AuthProvider } from "../contexts/AuthContext.jsx";
 
@@ -75,6 +76,10 @@ export const router = createBrowserRouter([
       {
         path: "my-reviews",
         Component: MyReviews
+      },
+      {
+        path: "add-scholarship",
+        Component: AddScholarship
       },
     ],
   },
