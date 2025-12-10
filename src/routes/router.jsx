@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import RootLayout from "../layouts/RootLayout.jsx";
+import DashboardLayout from "../layouts/DashboardLayout.jsx";
 import Home from "../pages/Home/Home/Home.jsx";
 import Login from "../pages/Login.jsx";
 import Register from "../pages/Register.jsx";
@@ -9,6 +10,9 @@ import ScholarshipDetails from "../pages/ScholarshipDetails.jsx";
 import Checkout from "../pages/Checkout.jsx";
 import PaymentSuccess from "../pages/PaymentSuccess.jsx";
 import PaymentFailed from "../pages/PaymentFailed.jsx";
+import MyProfile from "../pages/Dashboard/MyProfile.jsx";
+import MyApplications from "../pages/Dashboard/MyApplications.jsx";
+import MyReviews from "../pages/Dashboard/MyReviews.jsx";
 import PrivateRoute from "../components/PrivateRoute.jsx";
 import { AuthProvider } from "../contexts/AuthContext.jsx";
 
@@ -53,6 +57,24 @@ export const router = createBrowserRouter([
       {
         path: "*",
         Component: Error
+      },
+    ],
+  },
+  {
+    path: "/dashboard",
+    Component: DashboardLayout,
+    children: [
+      {
+        path: "my-profile",
+        Component: MyProfile
+      },
+      {
+        path: "my-applications",
+        Component: MyApplications
+      },
+      {
+        path: "my-reviews",
+        Component: MyReviews
       },
     ],
   },
