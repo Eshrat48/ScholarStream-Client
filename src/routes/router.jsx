@@ -1,12 +1,16 @@
 import { createBrowserRouter } from "react-router";
 import RootLayout from "../layouts/RootLayout.jsx";
 import Home from "../pages/Home/Home/Home.jsx";
-import LogIn from "../pages/LogIn.jsx";
+import Login from "../pages/Login.jsx";
 import Register from "../pages/Register.jsx";
 import Error from "../pages/Error.jsx";
-
-// Placeholder for AllScholarships page - will be created later
-const AllScholarships = () => <div className="container mx-auto py-20"><h1 className="text-3xl font-bold">All Scholarships</h1><p className="text-gray-600 mt-4">Coming Soon - Search and filter functionality will be implemented with server integration</p></div>;
+import AllScholarships from "../pages/AllScholarships.jsx";
+import ScholarshipDetails from "../pages/ScholarshipDetails.jsx";
+import Checkout from "../pages/Checkout.jsx";
+import PaymentSuccess from "../pages/PaymentSuccess.jsx";
+import PaymentFailed from "../pages/PaymentFailed.jsx";
+import PrivateRoute from "../components/PrivateRoute.jsx";
+import { AuthProvider } from "../contexts/AuthContext.jsx";
 
 export const router = createBrowserRouter([
   {
@@ -19,12 +23,28 @@ export const router = createBrowserRouter([
         Component: Home
       },
       {
-        path: "all-scholarships",
+        path: "scholarships",
         Component: AllScholarships
       },
       {
+        path: "scholarships/:id",
+        Component: ScholarshipDetails
+      },
+      {
+        path: "checkout/:scholarshipId",
+        Component: Checkout
+      },
+      {
+        path: "payment-success",
+        Component: PaymentSuccess
+      },
+      {
+        path: "payment-failed",
+        Component: PaymentFailed
+      },
+      {
         path: "login",
-        Component: LogIn
+        Component: Login
       },
       {
         path: "register",
