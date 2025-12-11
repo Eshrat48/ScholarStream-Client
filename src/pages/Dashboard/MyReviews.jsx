@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { get, patch, deleteRequest } from '../../utils/apiClient';
+import { useAuth } from '../../hooks/useAuth';
 import { FaTrash, FaEdit, FaStar } from 'react-icons/fa';
 
 const MyReviews = () => {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,7 +17,8 @@ const MyReviews = () => {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const response = await get('/reviews/my-reviews');
+      const endpoint = user?.email ? `/reviews/user/${encodeURIComponent(user.email)}` : '/reviews/my-reviews';
+      const response = await get(endpoint);
       setReviews(response.data || []);
     } catch (err) {
       setError(err.message || 'Failed to load reviews');
@@ -66,74 +69,86 @@ const MyReviews = () => {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">My Reviews</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">My Reviews</h1>
+      </div>
 
-      {error && (
-        <div className="alert alert-error mb-4">
-          <span>{error}</span>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Header description */}
+        <div className="p-6 border-b border-gray-200">
+          {error ? (
+            <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg px-4 py-2 text-sm">
+              {error}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-600">Manage and view all the scholarship reviews you have submitted.</p>
+          )}
         </div>
-      )}
 
-      {reviews.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-gray-600 text-lg">You haven't written any reviews yet</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
-            <thead>
-              <tr>
-                <th>Scholarship</th>
-                <th>University</th>
-                <th>Rating</th>
-                <th>Comment</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reviews.map((review) => (
-                <tr key={review._id}>
-                  <td className="font-semibold">{review.scholarshipName}</td>
-                  <td>{review.universityName}</td>
-                  <td>
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar
-                          key={i}
-                          className={i < review.ratingPoint ? 'text-yellow-400' : 'text-gray-300'}
-                        />
-                      ))}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="max-w-xs truncate">{review.reviewComment}</div>
-                  </td>
-                  <td>{new Date(review.reviewDate).toLocaleDateString()}</td>
-                  <td>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(review)}
-                        className="btn btn-ghost btn-xs"
-                        title="Edit"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(review._id)}
-                        className="btn btn-error btn-xs"
-                        title="Delete"
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </td>
+        {reviews.length === 0 ? (
+          <div className="p-10 text-center">
+            <p className="text-gray-600 text-lg">You haven't written any reviews yet.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left">
+              <thead>
+                <tr className="bg-gray-50 text-gray-700">
+                  <th className="px-6 py-3 border-b border-gray-200">Scholarship Name</th>
+                  <th className="px-6 py-3 border-b border-gray-200">University Name</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Review Date</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Rating</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {reviews.map((review) => (
+                  <tr key={review._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <div className="font-semibold text-gray-900">{review.scholarshipName}</div>
+                      {review.reviewComment && (
+                        <div className="text-sm text-gray-600 truncate max-w-md">{review.reviewComment}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-gray-800">{review.universityName}</td>
+                    <td className="px-6 py-4 text-gray-800">
+                      {review.reviewDate ? new Date(review.reviewDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : '—'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <FaStar key={i} className={i < (review.ratingPoint || 0) ? 'text-yellow-400' : 'text-gray-300'} />
+                          ))}
+                        </div>
+                        <span className="text-sm text-gray-700">{Number(review.ratingPoint || 0).toFixed(1)}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleEdit(review)}
+                          className="p-2 rounded-md text-blue-600 hover:bg-blue-50"
+                          title="Edit"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(review._id)}
+                          className="p-2 rounded-md text-red-600 hover:bg-red-50"
+                          title="Delete"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Edit Modal */}
       {editingReview && (

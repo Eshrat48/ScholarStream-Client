@@ -19,6 +19,7 @@ import ManageUsers from "../pages/Dashboard/ManageUsers.jsx";
 import Analytics from "../pages/Dashboard/Analytics.jsx";
 import ManageApplications from "../pages/Dashboard/ManageApplications.jsx";
 import AllReviews from "../pages/Dashboard/AllReviews.jsx";
+import StudentDashboard from "../pages/Dashboard/StudentDashboard.jsx";
 import PrivateRoute from "../components/PrivateRoute.jsx";
 import { AuthProvider } from "../contexts/AuthContext.jsx";
 
@@ -70,6 +71,10 @@ export const router = createBrowserRouter([
     path: "/dashboard",
     Component: DashboardLayout,
     children: [
+      {
+        index: true,
+        Component: StudentDashboard
+      },
       {
         path: "my-profile",
         Component: MyProfile

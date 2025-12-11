@@ -51,6 +51,21 @@ const ScholarshipDetails = () => {
     ? reviews.reduce((sum, r) => sum + (r.ratingPoint || 0), 0) / reviews.length
     : 0;
 
+  // Check authentication on component mount
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: { pathname: window.location.pathname } } });
+    }
+  }, [isAuthenticated, navigate]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className='min-h-screen flex items-center justify-center'>
+        <span className='loading loading-spinner loading-lg'></span>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className='min-h-screen flex items-center justify-center'>

@@ -37,7 +37,7 @@ const Navbar = () => {
                     {user && (
                         <>
                             <Link to="/dashboard/my-applications" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">My Applications</Link>
-                            <Link to="/dashboard/profile" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Profile</Link>
+                            <Link to="/dashboard/my-profile" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Profile</Link>
                         </>
                     )}
                 </div>

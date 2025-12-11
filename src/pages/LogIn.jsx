@@ -62,10 +62,14 @@ const Login = () => {
         // User might already exist
       }
 
-      const tokenResponse = await post('/auth/generate-token', { email: user.email });
-      const token = tokenResponse.data.token;
+      const tokenResponse = await post('/auth/jwt', { email: user.email });
+      const token = tokenResponse.token;
       localStorage.setItem('token', token);
 
+      // Small delay to allow Firebase auth state to propagate
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Navigate after state is updated by Firebase auth observer
       const from = location.state?.from?.pathname || '/';
       navigate(from, { replace: true });
     } catch (err) {

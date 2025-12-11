@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { get, patch, deleteRequest } from '../../utils/apiClient';
 import { Link } from 'react-router-dom';
-import { FaTrash, FaEdit, FaDollarSign, FaEye } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaDollarSign, FaEye, FaSearch } from 'react-icons/fa';
 
 const MyApplications = () => {
   const { user } = useAuth();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedApp, setSelectedApp] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('All');
 
   useEffect(() => {
     fetchApplications();
@@ -18,7 +19,7 @@ const MyApplications = () => {
   const fetchApplications = async () => {
     setLoading(true);
     try {
-      const response = await get('/applications/my-applications');
+      const response = await get(`/applications/user/${user?.email}`);
       setApplications(response.data || []);
     } catch (err) {
       setError(err.message || 'Failed to load applications');
@@ -39,14 +40,24 @@ const MyApplications = () => {
   };
 
   const getStatusBadge = (status) => {
-    const badges = {
-      pending: 'badge-warning',
-      processing: 'badge-info',
-      completed: 'badge-success',
-      rejected: 'badge-error',
+    const statusStyles = {
+      pending: 'bg-yellow-100 text-yellow-700',
+      processing: 'bg-blue-100 text-blue-700',
+      approved: 'bg-green-100 text-green-700',
+      rejected: 'bg-red-100 text-red-700',
+      completed: 'bg-blue-100 text-blue-700',
     };
-    return badges[status] || 'badge-ghost';
+    return statusStyles[status?.toLowerCase()] || 'bg-gray-100 text-gray-700';
   };
+
+  const filters = ['All', 'Pending', 'Approved', 'Rejected', 'Completed'];
+
+  const filteredApplications = applications.filter(app => {
+    const matchesFilter = activeFilter === 'All' || app.applicationStatus?.toLowerCase() === activeFilter.toLowerCase();
+    const matchesSearch = app.universityName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          app.subjectCategory?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   if (loading) {
     return (
@@ -57,140 +68,184 @@ const MyApplications = () => {
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">My Applications</h1>
-        <Link to="/scholarships" className="btn btn-primary">
-          Apply for Scholarships
-        </Link>
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Header */}
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">My Applications</h1>
+
+      {/* Search and Filters */}
+      <div className="mb-6 space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by university, status, or subject..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {filters.map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                activeFilter === filter
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error && (
-        <div className="alert alert-error mb-4">
-          <span>{error}</span>
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <span className="text-red-700">{error}</span>
         </div>
       )}
 
-      {applications.length === 0 ? (
-        <div className="text-center py-20">
-          <p className="text-gray-600 text-lg mb-4">You haven't applied to any scholarships yet</p>
-          <Link to="/scholarships" className="btn btn-primary">
+      {filteredApplications.length === 0 ? (
+        <div className="text-center py-20 bg-white rounded-lg border border-gray-200">
+          <p className="text-gray-600 text-lg mb-4">
+            {searchQuery || activeFilter !== 'All' 
+              ? 'No applications match your search or filter'
+              : "You haven't applied to any scholarships yet"}
+          </p>
+          <Link
+            to="/scholarships"
+            className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
             Browse Scholarships
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
-            <thead>
-              <tr>
-                <th>University</th>
-                <th>Subject</th>
-                <th>Fees</th>
-                <th>Status</th>
-                <th>Feedback</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applications.map((app) => (
-                <tr key={app._id}>
-                  <td>
-                    <div>
-                      <div className="font-bold">{app.universityName}</div>
-                      <div className="text-sm text-gray-600">{app.scholarshipCategory}</div>
-                    </div>
-                  </td>
-                  <td>{app.subjectCategory || 'N/A'}</td>
-                  <td>${app.applicationFees}</td>
-                  <td>
-                    <span className={`badge ${getStatusBadge(app.applicationStatus)}`}>
-                      {app.applicationStatus}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="max-w-xs truncate">
-                      {app.feedback || 'No feedback yet'}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setSelectedApp(app)}
-                        className="btn btn-ghost btn-xs"
-                        title="View Details"
-                      >
-                        <FaEye />
-                      </button>
-
-                      {app.applicationStatus === 'pending' && (
-                        <>
+        <>
+          {/* Table */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      University Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Subject Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Application Fees
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Feedback
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredApplications.map((app, index) => (
+                    <tr key={app._id || index} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div>
+                          <div className="font-semibold text-gray-900">
+                            {app.universityName || 'Unknown University'}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {app.universityAddress || app.universityCity || 'N/A'}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-900">
+                        {app.subjectCategory || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-gray-900 font-medium">
+                          ${app.applicationFees || '0'}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          ({app.paymentStatus || 'Unpaid'})
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(app.applicationStatus)}`}>
+                          {app.applicationStatus || 'Pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="max-w-xs text-sm text-gray-600">
+                          {app.feedback || 'No feedback yet'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
                           {app.paymentStatus === 'unpaid' && (
-                            <Link
-                              to={`/checkout/${app.scholarshipId}`}
-                              className="btn btn-primary btn-xs"
+                            <button
+                              className="px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded hover:bg-blue-700 transition-colors"
                               title="Pay"
                             >
-                              <FaDollarSign />
-                            </Link>
+                              Pay
+                            </button>
                           )}
                           
                           <button
-                            onClick={() => handleDelete(app._id)}
-                            className="btn btn-error btn-xs"
-                            title="Delete"
+                            className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded hover:bg-gray-200 transition-colors"
+                            title="View Details"
                           >
-                            <FaTrash />
+                            Details
                           </button>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
 
-      {/* Details Modal */}
-      {selectedApp && (
-        <dialog open className="modal">
-          <div className="modal-box w-11/12 max-w-2xl">
-            <h3 className="font-bold text-lg mb-4">Application Details</h3>
-            
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-600">University</p>
-                <p className="font-semibold">{selectedApp.universityName}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Scholarship Category</p>
-                <p className="font-semibold">{selectedApp.scholarshipCategory}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Application Date</p>
-                <p>{new Date(selectedApp.applicationDate).toLocaleDateString()}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Status</p>
-                <span className={`badge ${getStatusBadge(selectedApp.applicationStatus)}`}>
-                  {selectedApp.applicationStatus}
-                </span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Feedback</p>
-                <p>{selectedApp.feedback || 'No feedback provided yet'}</p>
-              </div>
-            </div>
-
-            <div className="modal-action">
-              <button onClick={() => setSelectedApp(null)} className="btn">Close</button>
+                          {(app.applicationStatus === 'pending' || app.applicationStatus === 'Pending') && (
+                            <button
+                              onClick={() => handleDelete(app._id)}
+                              className="px-3 py-1.5 bg-red-100 text-red-700 text-xs font-medium rounded hover:bg-red-200 transition-colors"
+                              title="Cancel Application"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setSelectedApp(null)}>close</button>
-          </form>
-        </dialog>
+
+          {/* Pagination */}
+          <div className="mt-6 flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              Showing 1 to {filteredApplications.length} of {applications.length} Entries
+            </p>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                Previous
+              </button>
+              <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded">
+                1
+              </button>
+              <button className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                2
+              </button>
+              <button className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                3
+              </button>
+              <button className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                Next
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

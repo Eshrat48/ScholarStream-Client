@@ -51,8 +51,8 @@ export const AuthProvider = ({ children }) => {
       });
 
       // Generate JWT token
-      const tokenResponse = await post('/auth/generate-token', { email });
-      const newToken = tokenResponse.data.token;
+      const tokenResponse = await post('/auth/jwt', { email });
+      const newToken = tokenResponse.token;
 
       localStorage.setItem('token', newToken);
       setToken(newToken);
@@ -72,8 +72,8 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithEmailAndPassword(auth, email, password);
 
       // Generate JWT token
-      const tokenResponse = await post('/auth/generate-token', { email });
-      const newToken = tokenResponse.data.token;
+      const tokenResponse = await post('/auth/jwt', { email });
+      const newToken = tokenResponse.token;
 
       localStorage.setItem('token', newToken);
       setToken(newToken);

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { FaEye, FaEyeSlash, FaCheck } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaCheck, FaBookOpen, FaClipboardList, FaChartLine } from "react-icons/fa";
 import { FcGoogle } from 'react-icons/fc';
 import { useAuth } from '../hooks/useAuth';
 import { auth } from '../config/firebase';
@@ -57,8 +57,11 @@ const Register = () => {
 
         try {
             await register(formData.name, formData.email, formData.password, formData.photoURL);
-            const from = location.state?.from?.pathname || '/';
-            navigate(from, { replace: true });
+            // Redirect to profile page to complete profile information
+            navigate('/dashboard/my-profile', { 
+                replace: true,
+                state: { newUser: true, message: 'Welcome! Please complete your profile to get started.' }
+            });
         } catch (error) {
             setApiError(error.message || 'Registration failed. Please try again.');
         } finally {
@@ -86,12 +89,19 @@ const Register = () => {
                 // User might already exist
             }
 
-            const tokenResponse = await post('/auth/generate-token', { email: user.email });
-            const token = tokenResponse.data.token;
+            const tokenResponse = await post('/auth/jwt', { email: user.email });
+            const token = tokenResponse.token;
             localStorage.setItem('token', token);
 
-            const from = location.state?.from?.pathname || '/';
-            navigate(from, { replace: true });
+            // Small delay to allow Firebase auth state to propagate
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Navigate after state is updated by Firebase auth observer
+            // Redirect new users to profile page to complete their information
+            navigate('/dashboard/my-profile', { 
+                replace: true,
+                state: { newUser: true, message: 'Welcome! Please complete your profile to get started.' }
+            });
         } catch (err) {
             setApiError(err.message || 'Google sign-up failed.');
         } finally {
@@ -135,10 +145,7 @@ const Register = () => {
                             <div className="space-y-6">
                                 <div className="flex items-start gap-4">
                                     <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                                            <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 0 0 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"></path>
-                                        </svg>
+                                        <FaBookOpen className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg mb-1">Access Thousands of Scholarships</h3>
@@ -147,9 +154,7 @@ const Register = () => {
                                 </div>
                                 <div className="flex items-start gap-4">
                                     <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4z" clipRule="evenodd"></path>
-                                        </svg>
+                                        <FaClipboardList className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg mb-1">Easy Application Process</h3>
@@ -158,9 +163,7 @@ const Register = () => {
                                 </div>
                                 <div className="flex items-start gap-4">
                                     <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z"></path>
-                                        </svg>
+                                        <FaChartLine className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
                                         <h3 className="font-semibold text-lg mb-1">Track Your Applications</h3>
