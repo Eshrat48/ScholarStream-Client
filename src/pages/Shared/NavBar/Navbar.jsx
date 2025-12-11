@@ -1,17 +1,18 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaBookOpen } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
+import { useAuth } from "../../../hooks/useAuth";
 
 const Navbar = () => {
-    // Replace this mock with your real auth state (context, redux, etc.)
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const user = {
-        name: "Jane Doe",
-        avatar:
-            "https://i.pravatar.cc/40?img=47",
+    const handleLogout = () => {
+        logout();
+        setMenuOpen(false);
+        navigate("/");
     };
 
     return (
@@ -30,12 +31,20 @@ const Navbar = () => {
                 {/* Center: Links (visible on md+) */}
                 <div className="hidden md:flex gap-8 items-center">
                     <Link to="/" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Home</Link>
-                    <Link to="/all-scholarships" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">All Scholarships</Link>
+                    <Link to="/scholarships" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">All Scholarships</Link>
+                    
+                    {/* Logged in navigation */}
+                    {user && (
+                        <>
+                            <Link to="/dashboard/my-applications" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">My Applications</Link>
+                            <Link to="/dashboard/profile" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Profile</Link>
+                        </>
+                    )}
                 </div>
 
                 {/* Right: Auth buttons or user profile */}
                 <div className="flex items-center gap-3">
-                    {!isLoggedIn ? (
+                    {!user ? (
                             <>
                             <Link to="/register" className="btn-gradient rounded-full px-5 py-2 text-base font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-150">
                                 Register
@@ -49,20 +58,44 @@ const Navbar = () => {
                             <button
                                 onClick={() => setMenuOpen((s) => !s)}
                                 className="flex items-center gap-3 bg-white border border-gray-100 rounded-full px-2 py-1 hover:shadow transition-shadow duration-150"
+                                title={user.email}
                             >
-                                <img src={user.avatar} alt="avatar" className="w-10 h-10 rounded-full" />
+                                <img 
+                                    src={user.photoURL || `https://i.pravatar.cc/40?img=${Math.floor(Math.random() * 70)}`} 
+                                    alt="avatar" 
+                                    className="w-10 h-10 rounded-full"
+                                />
                             </button>
 
                             {menuOpen && (
                                 <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg py-2 z-50 transform transition-all duration-150 origin-top-right">
-                                    <a className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100">Dashboard</a>
+                                    <div className="px-4 py-2 text-sm text-gray-600 border-b">
+                                        {user.displayName || user.email}
+                                    </div>
+                                    <Link 
+                                        to="/dashboard/my-profile" 
+                                        className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        Dashboard
+                                    </Link>
+                                    <Link 
+                                        to="/dashboard/my-applications" 
+                                        className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        My Applications
+                                    </Link>
+                                    <Link 
+                                        to="/dashboard/my-reviews" 
+                                        className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                                        onClick={() => setMenuOpen(false)}
+                                    >
+                                        My Reviews
+                                    </Link>
                                     <button
-                                        onClick={() => {
-                                            // Replace with real logout logic
-                                            setIsLoggedIn(false);
-                                            setMenuOpen(false);
-                                        }}
-                                        className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
+                                        onClick={handleLogout}
+                                        className="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 border-t"
                                     >
                                         <FiLogOut /> Logout
                                     </button>
