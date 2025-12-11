@@ -16,6 +16,9 @@ import MyReviews from "../pages/Dashboard/MyReviews.jsx";
 import AddScholarship from "../pages/Dashboard/AddScholarship.jsx";
 import ManageScholarships from "../pages/Dashboard/ManageScholarships.jsx";
 import ManageUsers from "../pages/Dashboard/ManageUsers.jsx";
+import Analytics from "../pages/Dashboard/Analytics.jsx";
+import ManageApplications from "../pages/Dashboard/ManageApplications.jsx";
+import AllReviews from "../pages/Dashboard/AllReviews.jsx";
 import PrivateRoute from "../components/PrivateRoute.jsx";
 import { AuthProvider } from "../contexts/AuthContext.jsx";
 
@@ -90,6 +93,18 @@ export const router = createBrowserRouter([
       {
         path: "manage-users",
         Component: ManageUsers
+      },
+      {
+        path: "analytics",
+        Component: Analytics
+      },
+      {
+        path: "manage-applications",
+        Component: ManageApplications
+      },
+      {
+        path: "all-reviews",
+        Component: AllReviews
       },
     ],
   },
