@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { post } from '../../utils/apiClient';
-import { SCHOLARSHIP_CATEGORY, SCHOLARSHIP_DEGREE } from '../../utils/constants';
+import { SCHOLARSHIP_CATEGORY, DEGREE_TYPES } from '../../utils/constants';
 
 const AddScholarship = () => {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ const AddScholarship = () => {
     universityCity: '',
     universityWorldRank: '',
     subjectCategory: '',
-    scholarshipCategory: 'Full fund',
+    scholarshipCategory: 'Merit-based',
     degree: 'Diploma',
     tuitionFees: '',
     applicationFees: '',
@@ -129,15 +129,20 @@ const AddScholarship = () => {
         universityWorldRank: parseInt(formData.universityWorldRank),
         tuitionFees: parseFloat(formData.tuitionFees),
         applicationFees: parseFloat(formData.applicationFees),
-        serviceCharge: parseFloat(formData.serviceCharge)
+        serviceCharge: parseFloat(formData.serviceCharge),
+        applicationDeadline: new Date(formData.applicationDeadline).toISOString()
       };
 
-      await post('/scholarships', scholarshipData);
+      const response = await post('/scholarships', scholarshipData);
+      console.log('Response:', response);
       alert('Scholarship added successfully!');
-      navigate('/dashboard/manage-scholarships');
+      // Reset form after successful submission
+      handleReset();
+      // Navigate to dashboard home or stay on page
+      // navigate('/dashboard/my-profile');
     } catch (error) {
       console.error('Error adding scholarship:', error);
-      alert('Failed to add scholarship. Please try again.');
+      alert(`Failed to add scholarship: ${error.message || 'Please try again.'}`);
     } finally {
       setLoading(false);
     }
@@ -152,7 +157,7 @@ const AddScholarship = () => {
       universityCity: '',
       universityWorldRank: '',
       subjectCategory: '',
-      scholarshipCategory: 'Full fund',
+      scholarshipCategory: 'Merit-based',
       degree: 'Diploma',
       tuitionFees: '',
       applicationFees: '',
@@ -220,7 +225,7 @@ const AddScholarship = () => {
                   onChange={handleChange}
                   className="select select-bordered w-full"
                 >
-                  {Object.values(SCHOLARSHIP_DEGREE).map(degree => (
+                  {Object.values(DEGREE_TYPES).map(degree => (
                     <option key={degree} value={degree}>{degree}</option>
                   ))}
                 </select>

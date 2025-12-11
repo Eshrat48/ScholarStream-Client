@@ -12,7 +12,7 @@ const HomeBanner = () => {
     const handleSearch = () => {
         if (searchQuery.trim()) {
             // Navigate to All Scholarships page with search query
-            navigate(`/all-scholarships?search=${encodeURIComponent(searchQuery)}`);
+            navigate(`/scholarships?search=${encodeURIComponent(searchQuery)}`);
         }
     };
 

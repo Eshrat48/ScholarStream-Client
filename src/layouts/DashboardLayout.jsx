@@ -1,7 +1,7 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useState, useEffect } from 'react';
-import { get } from '../../utils/apiClient';
+import { get } from '../utils/apiClient';
 import { FaHome, FaBook, FaStar, FaUser, FaSignOutAlt, FaUsers, FaChartBar, FaPlus } from 'react-icons/fa';
 
 const DashboardLayout = () => {
