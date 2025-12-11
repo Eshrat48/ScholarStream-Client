@@ -13,13 +13,14 @@ const TopScholarships = () => {
         const fetchTopScholarships = async () => {
             try {
                 setLoading(true);
-                // Fetch top 6 scholarships with lowest fees, sorted by newest first
+                // Fetch top 6 scholarships with lowest fees
                 const response = await get('/scholarships?limit=6&sortBy=applicationFees');
-                setScholarships(response || []);
+                // Handle both direct array and object with data property
+                const data = Array.isArray(response) ? response : (response?.scholarships || response?.data || []);
+                setScholarships(data);
             } catch (err) {
                 console.error('Failed to fetch scholarships:', err);
                 setError('Failed to load scholarships');
-                // Fallback to empty array
                 setScholarships([]);
             } finally {
                 setLoading(false);
@@ -111,61 +112,57 @@ const TopScholarships = () => {
                                 key={scholarship._id}
                                 variants={cardVariants}
                                 whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                                className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+                                className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary group flex flex-col h-full"
                             >
                                 {/* University Image */}
-                                <div className="relative h-48 overflow-hidden">
+                                <figure className="h-48 overflow-hidden flex-shrink-0">
                                     <img
                                         src={scholarship.universityImage || 'https://via.placeholder.com/400x300'}
                                         alt={scholarship.universityName}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                     />
-                                    {/* Scholarship Category Badge */}
-                                    <div className="absolute top-4 right-4">
-                                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500 text-white">
-                                            {scholarship.scholarshipCategory}
-                                        </span>
-                                    </div>
-                                </div>
+                                </figure>
 
                                 {/* Card Content */}
-                                <div className="p-6">
+                                <div className="p-5 flex flex-col flex-grow">
                                     {/* University Name */}
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                                        {scholarship.universityName}
-                                    </h3>
-
+                                    <h3 className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">{scholarship.universityName}</h3>
+                                    
                                     {/* Scholarship Name */}
-                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                                        {scholarship.scholarshipName}
-                                    </p>
+                                    <h2 className="text-lg font-bold text-gray-800 leading-tight mb-3 line-clamp-2">{scholarship.scholarshipName}</h2>
+
+                                    {/* Category Badges */}
+                                    <div className="flex gap-2 mb-3">
+                                        <span className="badge badge-primary badge-sm text-white font-medium">{scholarship.scholarshipCategory}</span>
+                                        <span className="badge badge-secondary badge-sm text-white font-medium">{scholarship.degree}</span>
+                                    </div>
 
                                     {/* Location */}
-                                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                                        <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                                        <svg className="w-4 h-4 text-primary mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                                         </svg>
-                                        <span>{scholarship.universityCity}, {scholarship.universityCountry}</span>
+                                        <span className="font-medium">{scholarship.universityCity}, {scholarship.universityCountry}</span>
                                     </div>
 
-                                    {/* Degree & Category */}
-                                    <div className="flex gap-2 mb-4">
-                                        <span className="badge badge-sm badge-primary">{scholarship.degree}</span>
-                                        <span className="badge badge-sm badge-secondary">{scholarship.scholarshipCategory}</span>
-                                    </div>
-
-                                    {/* Application Fees */}
-                                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
-                                        <span className="text-sm text-gray-600">Application Fee:</span>
-                                        <span className={`text-lg font-bold ${scholarship.applicationFees === 0 ? 'text-green-600' : 'text-blue-600'}`}>
-                                            {scholarship.applicationFees === 0 ? "Free" : `$${scholarship.applicationFees}`}
+                                    {/* Application Fee */}
+                                    <div className="flex items-center text-sm text-gray-600 mb-4 mt-auto pt-3 border-t border-gray-200">
+                                        <svg className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10.5 1.5H5.75A2.25 2.25 0 003.5 3.75v12.5A2.25 2.25 0 005.75 18.5h8.5a2.25 2.25 0 002.25-2.25V6.5m-11-5v5h5m0-5L19 10" />
+                                        </svg>
+                                        <span className="font-medium">
+                                            {scholarship.applicationFees === 0 ? (
+                                                <span className="text-green-600 font-semibold">No Fee</span>
+                                            ) : (
+                                                <span>${scholarship.applicationFees}</span>
+                                            )}
                                         </span>
                                     </div>
 
                                     {/* View Details Button */}
                                     <button
                                         onClick={() => handleViewDetails(scholarship._id)}
-                                        className="w-full btn btn-primary btn-sm"
+                                        className="btn btn-primary btn-sm w-full shadow-md hover:shadow-lg transition-shadow mt-2"
                                     >
                                         View Details →
                                     </button>

@@ -13,7 +13,7 @@ const AllScholarships = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedDegree, setSelectedDegree] = useState('');
-  const [sortBy, setSortBy] = useState('postDate');
+  const [sortBy, setSortBy] = useState('');
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,8 +33,9 @@ const AllScholarships = () => {
       const params = new URLSearchParams({
         page: currentPage,
         limit: itemsPerPage,
-        sortBy: sortBy,
       });
+
+      if (sortBy) params.append('sortBy', sortBy);
 
       if (searchTerm) params.append('search', searchTerm);
       if (selectedCategory) params.append('category', selectedCategory);
@@ -61,7 +62,7 @@ const AllScholarships = () => {
     setSearchTerm('');
     setSelectedCategory('');
     setSelectedDegree('');
-    setSortBy('postDate');
+    setSortBy('');
     setCurrentPage(1);
   };
 
@@ -81,6 +82,7 @@ const AllScholarships = () => {
               onChange={(e) => setSortBy(e.target.value)}
               className="select select-bordered select-sm bg-white text-gray-700"
             >
+              <option value="">Default</option>
               <option value="postDate">Deadline</option>
               <option value="applicationFees">Application Fee</option>
             </select>
@@ -218,9 +220,9 @@ const AllScholarships = () => {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {scholarships.map(scholarship => (
-                    <div key={scholarship._id} className="card bg-white shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary overflow-hidden group">
+                    <div key={scholarship._id} className="card bg-white shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-primary overflow-hidden group flex flex-col h-full">
                       {/* Scholarship Image */}
-                      <figure className="h-48 overflow-hidden">
+                      <figure className="h-48 overflow-hidden flex-shrink-0">
                         <img
                           src={scholarship.universityImage || 'https://via.placeholder.com/400x300'}
                           alt={scholarship.universityName}
@@ -228,10 +230,10 @@ const AllScholarships = () => {
                         />
                       </figure>
 
-                      <div className="card-body p-5">
+                      <div className="card-body p-5 flex flex-col flex-grow">
                         {/* University & Scholarship Name */}
-                        <h3 className="text-xs font-semibold text-primary uppercase tracking-wide">{scholarship.universityName}</h3>
-                        <h2 className="card-title text-lg font-bold text-gray-800 leading-tight mb-3">{scholarship.scholarshipName}</h2>
+                        <h3 className="text-xs font-semibold text-primary uppercase tracking-wide mb-1">{scholarship.universityName}</h3>
+                        <h2 className="text-lg font-bold text-gray-800 leading-tight mb-3 line-clamp-2">{scholarship.scholarshipName}</h2>
 
                         {/* Category Badges */}
                         <div className="flex gap-2 mb-3">
@@ -241,18 +243,18 @@ const AllScholarships = () => {
 
                         {/* Location */}
                         <div className="flex items-center text-sm text-gray-600 mb-2">
-                          <FaMapMarkerAlt className="mr-2 text-primary" />
+                          <FaMapMarkerAlt className="mr-2 text-primary flex-shrink-0" />
                           <span className="font-medium">{scholarship.universityCity}, {scholarship.universityCountry}</span>
                         </div>
 
                         {/* Application Fee */}
-                        <div className="flex items-center text-sm text-gray-600 mb-4">
-                          <FaDollarSign className="mr-2 text-green-600" />
+                        <div className="flex items-center text-sm text-gray-600 mb-4 mt-auto pt-3 border-t border-gray-200">
+                          <FaDollarSign className="mr-2 text-green-600 flex-shrink-0" />
                           <span className="font-medium">
                             {scholarship.applicationFees === 0 ? (
-                              <span className="text-green-600 font-semibold">No Application Fee</span>
+                              <span className="text-green-600 font-semibold">No Fee</span>
                             ) : (
-                              `$${scholarship.applicationFees} Application Fee`
+                              <span>${scholarship.applicationFees}</span>
                             )}
                           </span>
                         </div>
@@ -260,7 +262,7 @@ const AllScholarships = () => {
                         {/* View Details Button */}
                         <Link
                           to={`/scholarships/${scholarship._id}`}
-                          className="btn btn-primary btn-sm w-full shadow-md hover:shadow-lg transition-shadow"
+                          className="btn btn-primary btn-sm w-full shadow-md hover:shadow-lg transition-shadow mt-2"
                         >
                           View Details →
                         </Link>

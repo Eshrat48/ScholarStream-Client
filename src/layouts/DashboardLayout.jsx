@@ -2,6 +2,7 @@ import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useState, useEffect } from 'react';
 import { get } from '../utils/apiClient';
+import ScrollToTop from '../components/ScrollToTop.jsx';
 import { FaHome, FaBook, FaStar, FaUser, FaSignOutAlt, FaUsers, FaChartBar, FaPlus } from 'react-icons/fa';
 
 const DashboardLayout = () => {
@@ -41,7 +42,9 @@ const DashboardLayout = () => {
   }
 
   return (
-    <div className="drawer lg:drawer-open">
+    <>
+      <ScrollToTop />
+      <div className="drawer lg:drawer-open">
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
       
       <div className="drawer-content flex flex-col">
@@ -169,7 +172,8 @@ const DashboardLayout = () => {
           </ul>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
