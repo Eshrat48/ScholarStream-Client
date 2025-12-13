@@ -37,7 +37,7 @@ const Navbar = () => {
                     {user && (
                         <>
                             <Link to="/dashboard/my-applications" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">My Applications</Link>
-                            <Link to="/dashboard/my-profile" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Profile</Link>
+                            <Link to="/dashboard" className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors duration-150">Dashboard</Link>
                         </>
                     )}
                 </div>
@@ -61,9 +61,12 @@ const Navbar = () => {
                                 title={user.email}
                             >
                                 <img 
-                                    src={user.photoURL || `https://i.pravatar.cc/40?img=${Math.floor(Math.random() * 70)}`} 
+                                    src={user.photoURL || localStorage.getItem('userPhotoURL') || `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=0D8ABC&color=fff`} 
                                     alt="avatar" 
-                                    className="w-10 h-10 rounded-full"
+                                    className="w-10 h-10 rounded-full object-cover"
+                                    onError={(e) => {
+                                      e.target.src = `https://ui-avatars.com/api/?name=${user.displayName || user.email}&background=0D8ABC&color=fff`;
+                                    }}
                                 />
                             </button>
 
@@ -73,7 +76,7 @@ const Navbar = () => {
                                         {user.displayName || user.email}
                                     </div>
                                     <Link 
-                                        to="/dashboard/my-profile" 
+                                        to="/dashboard" 
                                         className="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100"
                                         onClick={() => setMenuOpen(false)}
                                     >

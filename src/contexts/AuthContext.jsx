@@ -20,6 +20,34 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
+        console.log('Auth state changed - currentUser:', {
+          displayName: currentUser.displayName,
+          email: currentUser.email,
+          photoURL: currentUser.photoURL,
+          uid: currentUser.uid
+        });
+
+        // Ensure user data is in database (for Google login, this might be missing photoURL)
+        try {
+          const syncResponse = await post('/users', {
+            name: currentUser.displayName,
+            email: currentUser.email,
+            photoURL: currentUser.photoURL,
+            role: 'Student',
+          });
+          
+          console.log('User sync response:', syncResponse);
+          
+          // Enhance currentUser with photoURL from sync response if available
+          if (syncResponse.data?.photoURL && !currentUser.photoURL) {
+            currentUser.photoURL = syncResponse.data.photoURL;
+            console.log('Enhanced photoURL from sync response:', currentUser.photoURL);
+          }
+        } catch (err) {
+          // User might already exist or other error - continue anyway
+          console.log('User data sync note:', err.message);
+        }
+        
         setUser(currentUser);
         const storedToken = localStorage.getItem('token');
         if (storedToken) {

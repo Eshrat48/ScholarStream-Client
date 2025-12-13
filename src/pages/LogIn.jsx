@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useAuth } from '../hooks/useAuth';
 import { auth } from '../config/firebase';
-import { post } from '../utils/apiClient';
+import { post, get } from '../utils/apiClient';
 import { FcGoogle } from 'react-icons/fc';
 import { FaBookOpen } from 'react-icons/fa';
 
@@ -48,18 +48,48 @@ const Login = () => {
 
     try {
       const provider = new GoogleAuthProvider();
+      provider.addScope('profile');
+      provider.addScope('email');
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
+      // Determine role: keep existing role if user already exists, otherwise default to Student
+      let resolvedRole = 'Student';
       try {
-        await post('/users', {
+        const existing = await get(`/users/${user.email}`);
+        if (existing?.data?.role) {
+          resolvedRole = existing.data.role;
+        }
+      } catch (err) {
+        // Not found or error: keep default Student
+      }
+
+      console.log('Google login result:', {
+        displayName: user.displayName,
+        email: user.email,
+        photoURL: user.photoURL,
+        uid: user.uid
+      });
+
+      // Store photoURL in localStorage as backup
+      if (user.photoURL) {
+        localStorage.setItem('userPhotoURL', user.photoURL);
+        console.log('Stored photoURL in localStorage:', user.photoURL);
+      } else {
+        console.warn('No photoURL available from Google auth');
+      }
+
+      try {
+        const postResponse = await post('/users', {
           name: user.displayName,
           email: user.email,
           photoURL: user.photoURL,
-          role: 'Student',
+          role: resolvedRole,
         });
+        console.log('POST /users response:', postResponse);
       } catch (err) {
         // User might already exist
+        console.log('POST /users note:', err.message);
       }
 
       const tokenResponse = await post('/auth/jwt', { email: user.email });
@@ -74,6 +104,7 @@ const Login = () => {
       navigate(from, { replace: true });
     } catch (err) {
       setError(err.message || 'Google login failed.');
+      console.error('Google login error:', err);
     } finally {
       setIsLoading(false);
     }

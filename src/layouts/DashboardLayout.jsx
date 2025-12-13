@@ -7,6 +7,14 @@ import { get } from '../utils/apiClient';
 import ScrollToTop from '../components/ScrollToTop.jsx';
 import { FaHome, FaBook, FaStar, FaUser, FaSignOutAlt, FaUsers, FaChartBar, FaPlus, FaBookOpen } from 'react-icons/fa';
 
+const DashboardLayout = () => {
+  return (
+    <AuthProvider>
+      <DashboardLayoutContent />
+    </AuthProvider>
+  );
+};
+
 const DashboardLayoutContent = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -23,10 +31,16 @@ const DashboardLayoutContent = () => {
     
     try {
       const response = await get(`/users/${user.email}`);
-      setUserRole(response.data?.role || 'Student');
-      setUserProfile(response.data || null);
+      const userData = response.data || null;
+      setUserRole(userData?.role || 'Student');
+      setUserProfile(userData);
+      
+      // If we got photoURL from database but user object doesn't have it, update user
+      if (userData?.photoURL && !user?.photoURL) {
+        user.photoURL = userData.photoURL;
+      }
     } catch (err) {
-      console.error('Failed to fetch user role');
+      console.error('Failed to fetch user role:', err);
     } finally {
       setLoading(false);
     }
@@ -85,19 +99,29 @@ const DashboardLayoutContent = () => {
 
             <div className="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
               <div className="avatar">
-                <div className="w-12 h-12 rounded-full ring-1 ring-gray-200 overflow-hidden">
-                  {user?.photoURL || userProfile?.photoURL ? (
-                    <img src={user?.photoURL || userProfile?.photoURL} alt="Profile" />
-                  ) : (
-                    <div className="bg-blue-600 text-white w-full h-full flex items-center justify-center">
-                      <span className="text-xl">{user?.displayName?.charAt(0) || 'U'}</span>
-                    </div>
-                  )}
+                <div className="w-12 h-12 rounded-full ring-1 ring-gray-200 overflow-hidden bg-blue-100">
+                  {(user?.photoURL || userProfile?.photoURL || localStorage.getItem('userPhotoURL')) ? (
+                    <img 
+                      src={user?.photoURL || userProfile?.photoURL || localStorage.getItem('userPhotoURL')} 
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className="bg-blue-600 text-white w-full h-full flex items-center justify-center text-lg font-semibold"
+                    style={{display: (user?.photoURL || userProfile?.photoURL || localStorage.getItem('userPhotoURL')) ? 'none' : 'flex'}}
+                  >
+                    {user?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
                 </div>
               </div>
-              <div>
-                <p className="font-semibold">{user?.displayName}</p>
-                <p className="text-sm text-gray-600">{userRole}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-900 truncate">{user?.displayName || 'User'}</p>
+                <p className="text-sm text-gray-600 truncate">{userRole}</p>
               </div>
             </div>
           </div>
@@ -277,14 +301,6 @@ const DashboardLayoutContent = () => {
       </div>
       </div>
     </>
-  );
-};
-
-const DashboardLayout = () => {
-  return (
-    <AuthProvider>
-      <DashboardLayoutContent />
-    </AuthProvider>
   );
 };
 
