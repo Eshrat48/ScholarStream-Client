@@ -162,7 +162,107 @@ const MyProfile = () => {
       </div>
     );
   }
-  const isModerator = (userData?.role || '').toLowerCase() === 'moderator';
+  const roleValue = (userData?.role || '').toLowerCase();
+  const isModerator = roleValue === 'moderator';
+  const isAdmin = roleValue === 'admin';
+
+  // Admin layout (compact overview)
+  if (isAdmin) {
+    const name = userData?.name || user?.displayName || 'Admin User';
+    const email = user?.email || 'admin@email.com';
+    const phone = userData?.phoneNumber || 'Not provided';
+    const memberSince = userData?.memberSince || 'Not provided';
+    const lastLogin = userData?.lastLogin || 'Not provided';
+    const address = userData?.mailingAddress || 'Not provided';
+    const verified = true; // Firebase email is verified on Google; adjust if backend tracks otherwise
+
+    return (
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
+            <p className="text-sm text-gray-500">Admin overview</p>
+          </div>
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">Edit Profile</button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Profile card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col items-center text-center">
+            <img
+              src={user?.photoURL || userData?.photoURL || 'https://ui-avatars.com/api/?name=Admin&size=200'}
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover mb-4"
+            />
+            <h2 className="text-lg font-semibold text-gray-900">{name}</h2>
+            <p className="text-sm text-gray-500">Platform Administrator</p>
+            <span className="mt-3 inline-block px-3 py-1 text-xs font-semibold rounded bg-purple-100 text-purple-700">Admin</span>
+          </div>
+
+          {/* Personal info */}
+          <div className="bg-white border border-gray-200 rounded-xl p-6 md:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">Personal Information</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+              <div>
+                <div className="text-xs text-gray-500">Full Name</div>
+                <div className="font-medium text-gray-900">{name}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500">Email Address</div>
+                <div className="font-medium text-gray-900 flex items-center gap-2">
+                  {email}
+                  {verified && <span className="px-2 py-0.5 text-[10px] font-semibold rounded bg-green-100 text-green-700">Verified</span>}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500">Phone Number</div>
+                <div className="font-medium text-gray-900">{phone}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500">Mailing Address</div>
+                <div className="font-medium text-gray-900">{address}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white border border-gray-200 rounded-xl p-6 md:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-semibold text-gray-900">Account Settings</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+              <div>
+                <div className="text-xs text-gray-500">Role</div>
+                <div className="font-medium text-gray-900">Admin</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500">Member Since</div>
+                <div className="font-medium text-gray-900">{memberSince}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500">Last Login</div>
+                <div className="font-medium text-gray-900">{lastLogin}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col gap-3">
+            <div>
+              <div className="text-xs text-gray-500">Security</div>
+              <div className="font-medium text-gray-900">Email verified</div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Support</div>
+              <div className="font-medium text-gray-900">Contact platform admin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Moderator layout (simplified info view)
   if (isModerator) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { get, patch, deleteRequest } from '../../utils/apiClient';
-import { FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheckCircle, FaPlus, FaSearch } from 'react-icons/fa';
 
 const ManageScholarships = () => {
   const [scholarships, setScholarships] = useState([]);
@@ -9,6 +9,8 @@ const ManageScholarships = () => {
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
 
   useEffect(() => {
     fetchScholarships();
@@ -47,6 +49,10 @@ const ManageScholarships = () => {
     }));
   };
 
+  const filtered = scholarships
+    .filter(s => !search || s.scholarshipName?.toLowerCase().includes(search.toLowerCase()) || s.universityName?.toLowerCase().includes(search.toLowerCase()))
+    .filter(s => statusFilter === 'All' || (statusFilter === 'Open' ? !s.isClosed : s.isClosed));
+
   const handleSaveEdit = async () => {
     try {
       await patch(`/scholarships/${editingId}`, editData);
@@ -83,135 +89,179 @@ const ManageScholarships = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Manage Scholarships</h1>
-        <p className="text-gray-600">Edit or delete existing scholarships</p>
+    <div className="p-6 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Manage Scholarships</h1>
+          <p className="text-sm text-gray-600">Search, filter, edit, and remove scholarships.</p>
+        </div>
+        <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+          <FaPlus /> Add New Scholarship
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 bg-white border border-gray-200 rounded-lg p-3">
+        <div className="relative flex-1 min-w-[220px] max-w-xl">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by name, provider, etc."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-600">Status:</span>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          >
+            <option value="All">All</option>
+            <option value="Open">Open</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
       </div>
 
       {error && (
-        <div className="alert alert-error mb-4">
-          <span>{error}</span>
+        <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg px-4 py-3 text-sm">
+          {error}
         </div>
       )}
 
-      {scholarships.length === 0 ? (
-        <div className="alert alert-info">
-          <span>No scholarships found. Create one from the Add Scholarship page.</span>
+      {filtered.length === 0 ? (
+        <div className="bg-blue-50 text-blue-800 border border-blue-200 rounded-lg px-4 py-3 text-sm">
+          No scholarships found. Create one from the Add Scholarship page.
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
-            <thead>
-              <tr className="bg-gray-800 text-white">
-                <th>Scholarship Name</th>
-                <th>University</th>
-                <th>Category</th>
-                <th>Degree</th>
-                <th>Application Fees</th>
-                <th>Actions</th>
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-100 text-gray-700 uppercase text-xs tracking-wide">
+              <tr>
+                <th className="px-4 py-3">Scholarship Name</th>
+                <th className="px-4 py-3">University</th>
+                <th className="px-4 py-3">Category</th>
+                <th className="px-4 py-3">Degree</th>
+                <th className="px-4 py-3">Application Fee</th>
+                <th className="px-4 py-3">Deadline</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {scholarships.map(scholarship => (
-                <tr key={scholarship._id}>
-                  <td>
-                    {editingId === scholarship._id ? (
-                      <input
-                        type="text"
-                        value={editData.scholarshipName}
-                        onChange={(e) => handleEditChange('scholarshipName', e.target.value)}
-                        className="input input-bordered input-sm w-full"
-                      />
-                    ) : (
-                      scholarship.scholarshipName
-                    )}
-                  </td>
-                  <td>
-                    {editingId === scholarship._id ? (
-                      <input
-                        type="text"
-                        value={editData.universityName}
-                        onChange={(e) => handleEditChange('universityName', e.target.value)}
-                        className="input input-bordered input-sm w-full"
-                      />
-                    ) : (
-                      scholarship.universityName
-                    )}
-                  </td>
-                  <td>
-                    {editingId === scholarship._id ? (
-                      <input
-                        type="text"
-                        value={editData.scholarshipCategory}
-                        onChange={(e) => handleEditChange('scholarshipCategory', e.target.value)}
-                        className="input input-bordered input-sm w-full"
-                      />
-                    ) : (
-                      scholarship.scholarshipCategory
-                    )}
-                  </td>
-                  <td>
-                    {editingId === scholarship._id ? (
-                      <input
-                        type="text"
-                        value={editData.degree}
-                        onChange={(e) => handleEditChange('degree', e.target.value)}
-                        className="input input-bordered input-sm w-full"
-                      />
-                    ) : (
-                      scholarship.degree
-                    )}
-                  </td>
-                  <td>
-                    {editingId === scholarship._id ? (
-                      <input
-                        type="number"
-                        value={editData.applicationFees}
-                        onChange={(e) => handleEditChange('applicationFees', e.target.value)}
-                        className="input input-bordered input-sm w-full"
-                      />
-                    ) : (
-                      `$${scholarship.applicationFees}`
-                    )}
-                  </td>
-                  <td>
-                    {editingId === scholarship._id ? (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleSaveEdit}
-                          className="btn btn-sm btn-success"
-                        >
-                          <FaCheckCircle /> Save
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="btn btn-sm btn-ghost"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(scholarship)}
-                          className="btn btn-sm btn-info"
-                        >
-                          <FaEdit /> Edit
-                        </button>
-                        <button
-                          onClick={() => setShowDeleteConfirm(scholarship._id)}
-                          className="btn btn-sm btn-error"
-                        >
-                          <FaTrash /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
+            <tbody className="divide-y divide-gray-100">
+              {filtered.map((scholarship) => {
+                const isEditingRow = editingId === scholarship._id;
+                const deadline = scholarship.applicationDeadline || scholarship.deadline;
+                const isClosed = scholarship.isClosed || false;
+                return (
+                  <tr key={scholarship._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 font-semibold text-gray-900">
+                      {isEditingRow ? (
+                        <input
+                          type="text"
+                          value={editData.scholarshipName}
+                          onChange={(e) => handleEditChange('scholarshipName', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded"
+                        />
+                      ) : (
+                        scholarship.scholarshipName
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {isEditingRow ? (
+                        <input
+                          type="text"
+                          value={editData.universityName}
+                          onChange={(e) => handleEditChange('universityName', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded"
+                        />
+                      ) : (
+                        scholarship.universityName
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {isEditingRow ? (
+                        <input
+                          type="text"
+                          value={editData.scholarshipCategory}
+                          onChange={(e) => handleEditChange('scholarshipCategory', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded"
+                        />
+                      ) : (
+                        scholarship.scholarshipCategory
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {isEditingRow ? (
+                        <input
+                          type="text"
+                          value={editData.degree}
+                          onChange={(e) => handleEditChange('degree', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded"
+                        />
+                      ) : (
+                        scholarship.degree
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {isEditingRow ? (
+                        <input
+                          type="number"
+                          value={editData.applicationFees}
+                          onChange={(e) => handleEditChange('applicationFees', e.target.value)}
+                          className="w-full px-2 py-1 border border-gray-300 rounded"
+                        />
+                      ) : (
+                        `$${scholarship.applicationFees}`
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{deadline || '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${isClosed ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-700'}`}>
+                        {isClosed ? 'Closed' : 'Open'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {isEditingRow ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={handleSaveEdit}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700"
+                          >
+                            <FaCheckCircle /> Save
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleEdit(scholarship)}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-50 rounded hover:bg-blue-100"
+                          >
+                            <FaEdit /> Edit
+                          </button>
+                          <button
+                            onClick={() => setShowDeleteConfirm(scholarship._id)}
+                            className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-red-700 bg-red-50 rounded hover:bg-red-100"
+                          >
+                            <FaTrash /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
+          <div className="px-4 py-3 text-xs text-gray-500 border-t">Showing {filtered.length} scholarships</div>
         </div>
       )}
 
