@@ -89,13 +89,13 @@ const ManageScholarships = () => {
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50/30 p-6 space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manage Scholarships</h1>
-          <p className="text-sm text-gray-600">Search, filter, edit, and remove scholarships.</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Manage Scholarships</h1>
+          <p className="text-sm text-gray-600 mt-1">Search, filter, edit, and remove scholarships</p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+        <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-200 transition-all">
           <FaPlus /> Add New Scholarship
         </button>
       </div>

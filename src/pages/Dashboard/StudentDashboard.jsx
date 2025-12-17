@@ -42,16 +42,16 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-6 space-y-6">
       {/* Page Heading */}
-      <div className="space-y-2">
-        <p className="text-sm text-gray-600">
-          Dashboard / <span className="text-gray-900 font-medium">Scholarships</span>
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-blue-600">
+          Dashboard / <span className="text-gray-900">Scholarships</span>
         </p>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Find Your Next Opportunity</h1>
-            <p className="text-gray-600">Explore thousands of scholarships tailored to your profile and aspirations.</p>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Find Your Next Opportunity</h1>
+            <p className="text-gray-600 mt-1">Explore thousands of scholarships tailored to your profile and aspirations.</p>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -78,22 +78,22 @@ const StudentDashboard = () => {
           <input
             type="text"
             placeholder="Search for scholarships by name or keyword"
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-900 placeholder:text-gray-400"
           />
           <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="flex gap-3 overflow-x-auto pb-2">
         {filters.map((filter) => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+            className={`px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
               activeFilter === filter
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-200'
+                : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
             }`}
           >
             {filter}

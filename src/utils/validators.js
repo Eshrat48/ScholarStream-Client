@@ -8,9 +8,11 @@ export const validateEmail = (email) => {
 };
 
 export const validatePassword = (password) => {
-  // Min 6 chars, at least one uppercase, one lowercase, one number, one special char
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]{6,}$/;
-  return passwordRegex.test(password);
+  // Min 6 chars, at least one uppercase, one special char (matching UI requirements)
+  const hasMinLength = password.length >= 6;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  return hasMinLength && hasUppercase && hasSpecialChar;
 };
 
 export const validateName = (name) => {
@@ -30,9 +32,7 @@ export const getPasswordError = (password) => {
   if (!password) return 'Password is required';
   if (password.length < 6) return 'Password must be at least 6 characters';
   if (!/[A-Z]/.test(password)) return 'Password must contain an uppercase letter';
-  if (!/[a-z]/.test(password)) return 'Password must contain a lowercase letter';
-  if (!/\d/.test(password)) return 'Password must contain a number';
-  if (!/[@$!%*?&]/.test(password)) return 'Password must contain a special character (@$!%*?&)';
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return 'Password must contain a special character';
   return '';
 };
 
@@ -47,7 +47,8 @@ export const validateRegistrationForm = (formData) => {
     errors.email = 'Please enter a valid email';
   }
 
-  if (!validatePhotoURL(formData.photoURL)) {
+  // Photo URL is optional, only validate if provided
+  if (formData.photoURL && formData.photoURL.trim() !== '' && !validatePhotoURL(formData.photoURL)) {
     errors.photoURL = 'Please enter a valid photo URL';
   }
 

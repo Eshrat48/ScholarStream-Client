@@ -10,5 +10,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Debug helper: surface missing env vars clearly in dev
+if (import.meta.env.DEV) {
+  const missing = Object.entries(firebaseConfig)
+    .filter(([, v]) => !v)
+    .map(([k]) => k);
+  if (missing.length) {
+    // eslint-disable-next-line no-console
+    console.error('[Firebase] Missing environment variables:', missing);
+  }
+}
+
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);

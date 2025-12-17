@@ -11,6 +11,8 @@ const MyApplications = () => {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -68,9 +70,9 @@ const MyApplications = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-6">
       {/* Header */}
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">My Applications</h1>
+      <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-6">My Applications</h1>
 
       {/* Search and Filters */}
       <div className="mb-6 space-y-4">
@@ -81,21 +83,21 @@ const MyApplications = () => {
             placeholder="Search by university, status, or subject..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-gray-900 placeholder:text-gray-400"
           />
           <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
         </div>
 
         {/* Filter Buttons */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-3 overflow-x-auto pb-2">
           {filters.map((filter) => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+              className={`px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
                 activeFilter === filter
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-200'
+                  : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
               }`}
             >
               {filter}
@@ -198,6 +200,10 @@ const MyApplications = () => {
                           )}
                           
                           <button
+                            onClick={() => {
+                              setSelectedApp(app);
+                              setShowDetailsModal(true);
+                            }}
                             className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded hover:bg-gray-200 transition-colors"
                             title="View Details"
                           >
@@ -246,6 +252,121 @@ const MyApplications = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedApp && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">Application Details</h2>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Scholarship Info */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Scholarship Information</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Scholarship Name:</span>
+                    <p className="font-medium text-gray-900">{selectedApp.scholarshipName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">University:</span>
+                    <p className="font-medium text-gray-900">{selectedApp.universityName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Category:</span>
+                    <p className="font-medium text-gray-900">{selectedApp.scholarshipCategory || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Degree:</span>
+                    <p className="font-medium text-gray-900">{selectedApp.degree || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Subject:</span>
+                    <p className="font-medium text-gray-900">{selectedApp.subjectCategory || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Application Status */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Status</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Application Status:</span>
+                    <p className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 ${getStatusBadge(selectedApp.applicationStatus)}`}>
+                      {selectedApp.applicationStatus || 'Pending'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Payment Status:</span>
+                    <p className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-1 ${
+                      selectedApp.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}>
+                      {selectedApp.paymentStatus || 'Unpaid'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Application Date:</span>
+                    <p className="font-medium text-gray-900">
+                      {selectedApp.applicationDate ? new Date(selectedApp.applicationDate).toLocaleDateString() : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Info */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Payment Information</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Application Fee:</span>
+                    <p className="font-medium text-gray-900">${selectedApp.applicationFees || 0}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Service Charge:</span>
+                    <p className="font-medium text-gray-900">${selectedApp.serviceCharge || 0}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Total Paid:</span>
+                    <p className="font-bold text-blue-600">
+                      ${((selectedApp.applicationFees || 0) + (selectedApp.serviceCharge || 0)).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Feedback */}
+              {selectedApp.feedback && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Feedback</h3>
+                  <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700">
+                    {selectedApp.feedback}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

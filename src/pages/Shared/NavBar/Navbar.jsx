@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaBookOpen } from "react-icons/fa";
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import { useAuth } from "../../../hooks/useAuth";
 
 const Navbar = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -17,7 +18,7 @@ const Navbar = () => {
 
     return (
         <div className="sticky top-0 z-50 py-6">
-            <div className="mx-auto max-w-6xl bg-white shadow-xl rounded-xl px-6 py-3 flex items-center justify-between transition-shadow duration-300 hover:shadow-2xl">
+            <div className="mx-auto max-w-6xl bg-white shadow-xl rounded-xl px-6 py-3 flex items-center justify-between transition-shadow duration-300 hover:shadow-2xl relative">
                 {/* Left: Logo */}
                 <div className="flex items-center gap-3">
                     <Link to="/" className="logo-badge cursor-pointer fade-up">
@@ -26,6 +27,14 @@ const Navbar = () => {
                         </div>
                         <span className="text-black text-xl font-bold shimmer-text">ScholarStream</span>
                     </Link>
+                    {/* Mobile menu toggle */}
+                    <button
+                        className="md:hidden ml-2 p-2 rounded-lg border border-gray-200 hover:bg-gray-50 active:bg-gray-100"
+                        aria-label="Toggle navigation menu"
+                        onClick={() => setMobileOpen((s) => !s)}
+                    >
+                        {mobileOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
+                    </button>
                 </div>
 
                 {/* Center: Links (visible on md+) */}
@@ -41,6 +50,46 @@ const Navbar = () => {
                         </>
                     )}
                 </div>
+
+                {/* Mobile menu panel */}
+                {mobileOpen && (
+                    <div className="absolute left-3 right-3 top-full mt-2 md:hidden bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+                        <nav className="flex flex-col gap-2">
+                            <Link
+                                to="/"
+                                className="px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100"
+                                onClick={() => setMobileOpen(false)}
+                            >
+                                Home
+                            </Link>
+                            <Link
+                                to="/scholarships"
+                                className="px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100"
+                                onClick={() => setMobileOpen(false)}
+                            >
+                                All Scholarships
+                            </Link>
+                            {user && (
+                                <>
+                                    <Link
+                                        to="/dashboard/my-applications"
+                                        className="px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100"
+                                        onClick={() => setMobileOpen(false)}
+                                    >
+                                        My Applications
+                                    </Link>
+                                    <Link
+                                        to="/dashboard"
+                                        className="px-3 py-2 rounded-md text-gray-900 hover:bg-gray-100"
+                                        onClick={() => setMobileOpen(false)}
+                                    >
+                                        Dashboard
+                                    </Link>
+                                </>
+                            )}
+                        </nav>
+                    </div>
+                )}
 
                 {/* Right: Auth buttons or user profile */}
                 <div className="flex items-center gap-3">

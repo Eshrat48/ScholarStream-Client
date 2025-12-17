@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useLocation } from 'react-router-dom';
 import { get, patch, post } from '../../utils/apiClient';
-import { FaEdit, FaCheck, FaTimes, FaUpload, FaInfoCircle } from 'react-icons/fa';
+import { FaEdit, FaCheck, FaTimes, FaUpload, FaInfoCircle, FaCamera } from 'react-icons/fa';
 
 const MyProfile = () => {
   const { user } = useAuth();
@@ -23,8 +23,10 @@ const MyProfile = () => {
     major: '',
     currentYear: '',
     expectedGraduation: '',
-    gpa: ''
+    gpa: '',
+    photoURL: ''
   });
+  const [photoPreview, setPhotoPreview] = useState('');
   const [moderatorEditData, setModeratorEditData] = useState({
     name: '',
     phoneNumber: '',
@@ -48,6 +50,7 @@ const MyProfile = () => {
     try {
       const response = await get(`/users/${user.email}`);
       const data = response.data || {};
+      console.log('Fetched user data, photoURL length:', data.photoURL?.length || 0);
       setUserData(data);
       setEditData({
         dateOfBirth: data.dateOfBirth || '',
@@ -59,8 +62,10 @@ const MyProfile = () => {
         major: data.major || '',
         currentYear: data.currentYear || '',
         expectedGraduation: data.expectedGraduation || '',
-        gpa: data.gpa || ''
+        gpa: data.gpa || '',
+        photoURL: data.photoURL || ''
       });
+      setPhotoPreview(data.photoURL || '');
       setModeratorEditData({
         name: data.name || user?.displayName || '',
         phoneNumber: data.phoneNumber || '',
@@ -79,6 +84,24 @@ const MyProfile = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // For demo, use a public CDN URL or data URL
+      // In production, upload to Firebase Storage or backend
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result;
+        setPhotoPreview(dataUrl);
+        setEditData(prev => ({
+          ...prev,
+          photoURL: dataUrl
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleEdit = () => {
@@ -103,14 +126,17 @@ const MyProfile = () => {
         major: userData.major || '',
         currentYear: userData.currentYear || '',
         expectedGraduation: userData.expectedGraduation || '',
-        gpa: userData.gpa || ''
+        gpa: userData.gpa || '',
+        photoURL: userData.photoURL || ''
       });
+      setPhotoPreview(userData.photoURL || '');
     }
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
+      console.log('Saving profile with photoURL length:', editData.photoURL?.length || 0);
       await patch(`/users/${userData._id}`, editData);
       await fetchUserProfile();
       setIsEditing(false);
@@ -190,7 +216,7 @@ const MyProfile = () => {
           {/* Profile card */}
           <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col items-center text-center">
             <img
-              src={user?.photoURL || userData?.photoURL || 'https://ui-avatars.com/api/?name=Admin&size=200'}
+              src={userData?.photoURL || user?.photoURL || 'https://ui-avatars.com/api/?name=Admin&size=200'}
               alt="Profile"
               className="w-24 h-24 rounded-full object-cover mb-4"
             />
@@ -275,6 +301,15 @@ const MyProfile = () => {
       : 'Science, Arts & Humanities';
     const lastLogin = userData?.lastLogin || 'Today, 10:45 AM';
 
+    // Build robust avatar fallbacks
+    const displayName = (userData?.name?.trim())
+      || (user?.displayName?.trim())
+      || (user?.email ? user.email.split('@')[0] : 'Moderator');
+    const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&size=200&background=10b981&color=fff&bold=true`;
+    const avatarSrc = (userData?.photoURL && userData.photoURL.trim())
+      || (user?.photoURL && user.photoURL.trim())
+      || fallbackAvatar;
+
     return (
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center justify-between mb-6">
@@ -313,9 +348,10 @@ const MyProfile = () => {
             <div className="col-span-1">
               <div className="border border-gray-200 rounded-xl p-6 text-center">
                 <img
-                  src={user?.photoURL || userData?.photoURL || 'https://ui-avatars.com/api/?name=John+Doe&size=200'}
+                  src={avatarSrc}
                   alt="Profile"
                   className="w-24 h-24 rounded-full object-cover mx-auto mb-4"
+                  onError={(e) => { e.currentTarget.src = fallbackAvatar; }}
                 />
                 {isModeratorEditing ? (
                   <input
@@ -451,10 +487,21 @@ const MyProfile = () => {
           <div className="flex items-center gap-6">
             <div className="relative">
               <img
-                src={user?.photoURL || userData?.photoURL || 'https://ui-avatars.com/api/?name=John+Doe&size=200'}
+                src={userData?.photoURL || photoPreview || user?.photoURL || 'https://ui-avatars.com/api/?name=John+Doe&size=200'}
                 alt="Profile"
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
               />
+              {isEditing && (
+                <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
+                  <FaCamera className="text-sm" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">

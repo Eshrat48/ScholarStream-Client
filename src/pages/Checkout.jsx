@@ -25,13 +25,44 @@ const CheckoutForm = ({ scholarship, onSuccess, onFail }) => {
     setError('');
 
     try {
-      // Create payment intent
-      const paymentResponse = await post('/payments/create-payment-intent', {
-        amount: scholarship.applicationFees + scholarship.serviceCharge,
+      // Ensure fees are numbers with defaults
+      const applicationFees = Number(scholarship.applicationFees) || 0;
+      const serviceCharge = Number(scholarship.serviceCharge) || 0;
+      const totalAmount = applicationFees + serviceCharge;
+      
+      console.log('Scholarship data:', {
+        applicationFees: scholarship.applicationFees,
+        serviceCharge: scholarship.serviceCharge,
+        calculatedTotal: totalAmount,
         scholarshipId: scholarship._id,
+        scholarshipName: scholarship.scholarshipName
       });
 
-      const clientSecret = paymentResponse.data.clientSecret;
+      if (totalAmount <= 0) {
+        throw new Error('Invalid payment amount. Application fee and service charge must be greater than 0.');
+      }
+
+      console.log('Creating payment intent:', {
+        amount: totalAmount,
+        scholarshipId: scholarship._id,
+        scholarshipName: scholarship.scholarshipName
+      });
+
+      // Create payment intent
+      const paymentResponse = await post('/payments/create-payment-intent', {
+        amount: totalAmount,
+        scholarshipId: scholarship._id,
+        scholarshipName: scholarship.scholarshipName,
+        universityName: scholarship.universityName
+      });
+
+      console.log('Payment intent response:', paymentResponse);
+
+      const clientSecret = paymentResponse.clientSecret;
+
+      if (!clientSecret) {
+        throw new Error('No client secret received from server');
+      }
 
       // Confirm payment
       const result = await stripe.confirmCardPayment(clientSecret, {
@@ -44,13 +75,17 @@ const CheckoutForm = ({ scholarship, onSuccess, onFail }) => {
         },
       });
 
+      console.log('Stripe confirmation result:', result);
+
       if (result.error) {
+        console.error('Payment error:', result.error);
         setError(result.error.message);
         onFail(result.error.message);
       } else if (result.paymentIntent?.status === 'succeeded') {
         onSuccess();
       }
     } catch (err) {
+      console.error('Payment processing error:', err);
       setError(err.message || 'Payment processing failed');
       onFail(err.message || 'Payment processing failed');
     } finally {
@@ -212,6 +247,9 @@ const Checkout = () => {
       // Create application record
       await post('/applications', {
         scholarshipId,
+        userId: user?.uid,
+        userName: user?.displayName || 'Anonymous',
+        userEmail: user?.email,
         scholarshipName: scholarship.scholarshipName,
         universityName: scholarship.universityName,
         scholarshipCategory: scholarship.scholarshipCategory,
@@ -225,6 +263,7 @@ const Checkout = () => {
 
       navigate('/payment-success', { state: { scholarship } });
     } catch (err) {
+      console.error('Failed to create application:', err);
       navigate('/payment-failed', { state: { error: err.message } });
     }
   };
@@ -338,7 +377,7 @@ const Checkout = () => {
             <div>
               <h2 className="text-lg font-bold text-gray-900 mb-4">Payment Information</h2>
 
-              <Elements stripe={stripePromise}>
+              <Elements stripe={stripePromise} key={user?.email || 'anon'}>
                 <CheckoutForm 
                   scholarship={scholarship} 
                   onSuccess={handlePaymentSuccess}

@@ -18,11 +18,12 @@ const AllReviews = () => {
     try {
       setLoading(true);
       const response = await get('/reviews');
-      setReviews(response.reviews || []);
+      console.log('Reviews response:', response); // Debug log
+      setReviews(response.data || response.reviews || []);
       setError('');
     } catch (err) {
       console.error('Error fetching reviews:', err);
-      setError('Failed to load reviews');
+      setError('Failed to load reviews. Make sure you are logged in as a Moderator or Admin.');
     } finally {
       setLoading(false);
     }
@@ -74,21 +75,21 @@ const AllReviews = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-pink-50/30 p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">All Reviews</h1>
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">All Reviews</h1>
         <p className="text-gray-600 mt-1">Manage all student reviews for scholarships</p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 font-medium">
           {error}
         </div>
       )}
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search Bar */}
           <div className="flex-1">
@@ -99,7 +100,7 @@ const AllReviews = () => {
                 placeholder="Search by keyword, student, or university..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -108,7 +109,7 @@ const AllReviews = () => {
           <select
             value={filterRating}
             onChange={(e) => setFilterRating(e.target.value)}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
           >
             <option>All</option>
             <option value="5">5 Stars</option>
@@ -121,12 +122,12 @@ const AllReviews = () => {
       </div>
 
       {/* Results Count */}
-      <div className="mb-4 text-sm text-gray-600">
+      <div className="mb-4 text-sm font-semibold text-gray-700">
         Showing {filteredReviews.length} of {reviews.length} reviews
       </div>
 
       {/* Reviews Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 overflow-hidden">
         {filteredReviews.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             No reviews found

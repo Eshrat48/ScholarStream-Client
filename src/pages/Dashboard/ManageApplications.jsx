@@ -24,11 +24,12 @@ const ManageApplications = () => {
     try {
       setLoading(true);
       const response = await get('/applications');
-      setApplications(response.applications || []);
+      console.log('Applications response:', response); // Debug log
+      setApplications(response.data || response.applications || []);
       setError('');
     } catch (err) {
       console.error('Error fetching applications:', err);
-      setError('Failed to load applications');
+      setError('Failed to load applications. Make sure you are logged in as a Moderator or Admin.');
     } finally {
       setLoading(false);
     }
@@ -69,12 +70,18 @@ const ManageApplications = () => {
 
     setSaving(true);
     try {
+      // Use role-specific endpoints; the generic update route only works for students with pending apps
+      await Promise.all([
+        patch(`/applications/${selectedApp._id}/status`, { applicationStatus: newStatus }),
+        patch(`/applications/${selectedApp._id}/payment`, { paymentStatus: newPaymentStatus }),
+        patch(`/applications/${selectedApp._id}/feedback`, { feedback: feedbackText })
+      ]);
+
       const updates = {
         applicationStatus: newStatus,
         paymentStatus: newPaymentStatus,
         feedback: feedbackText
       };
-      await patch(`/applications/${selectedApp._id}`, updates);
 
       setApplications(prev =>
         prev.map(app =>
@@ -124,23 +131,26 @@ const ManageApplications = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Manage Applications</h1>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Manage Applications</h1>
+          <p className="text-sm text-gray-600 mt-1">Review, update status, and manage all scholarship applications</p>
+        </div>
+        <button className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-xl hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-200 font-semibold flex items-center gap-2 transition-all">
           <FaDownload /> Export Data
         </button>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 font-medium">
           {error}
         </div>
       )}
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
           {/* Search Bar */}
           <div className="flex-1">
@@ -151,7 +161,7 @@ const ManageApplications = () => {
                 placeholder="Search by name, email, or university"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -160,7 +170,7 @@ const ManageApplications = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
           >
             <option>Show All</option>
             <option>Pending</option>
@@ -174,7 +184,7 @@ const ManageApplications = () => {
           <select
             value={paymentFilter}
             onChange={(e) => setPaymentFilter(e.target.value)}
-            className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 font-medium"
           >
             <option>Payment All</option>
             <option>Payment Paid</option>
@@ -185,12 +195,12 @@ const ManageApplications = () => {
       </div>
 
       {/* Results Count */}
-      <div className="mb-4 text-sm text-gray-600">
+      <div className="mb-4 text-sm font-semibold text-gray-700">
         Showing {filteredApplications.length} of {applications.length} applications
       </div>
 
       {/* Applications Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 overflow-hidden">
         {filteredApplications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             No applications found

@@ -132,7 +132,7 @@ const Login = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-2" autoComplete="off">
             {/* Email Input */}
             <div>
               <label className="block text-xs font-semibold text-gray-700 mb-1">
@@ -144,6 +144,7 @@ const Login = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
+                autoComplete="off"
                 className="w-full px-2.5 py-2 text-xs rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 required
               />
@@ -160,6 +161,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
+                autoComplete="off"
                 className="w-full px-2.5 py-2 text-xs rounded-lg border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
                 required
               />

@@ -29,12 +29,18 @@ export const AuthProvider = ({ children }) => {
 
         // Ensure user data is in database (for Google login, this might be missing photoURL)
         try {
-          const syncResponse = await post('/users', {
+          const userData = {
             name: currentUser.displayName,
             email: currentUser.email,
-            photoURL: currentUser.photoURL,
             role: 'Student',
-          });
+          };
+          
+          // Only include photoURL if it exists
+          if (currentUser.photoURL) {
+            userData.photoURL = currentUser.photoURL;
+          }
+          
+          const syncResponse = await post('/users', userData);
           
           console.log('User sync response:', syncResponse);
           
@@ -70,13 +76,19 @@ export const AuthProvider = ({ children }) => {
       // Create Firebase user
       const result = await createUserWithEmailAndPassword(auth, email, password);
 
-      // Save user to database
-      const response = await post('/users', {
+      // Prepare user data - only include photoURL if it's not null/empty
+      const userData = {
         name,
         email,
-        photoURL,
         role: 'Student',
-      });
+      };
+      
+      if (photoURL && photoURL.trim() !== '') {
+        userData.photoURL = photoURL;
+      }
+
+      // Save user to database
+      const response = await post('/users', userData);
 
       // Generate JWT token
       const tokenResponse = await post('/auth/jwt', { email });
@@ -100,15 +112,24 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithEmailAndPassword(auth, email, password);
 
       // Generate JWT token
+      console.log('Requesting JWT for:', email);
       const tokenResponse = await post('/auth/jwt', { email });
+      console.log('JWT response:', tokenResponse);
       const newToken = tokenResponse.token;
+
+      if (!newToken) {
+        throw new Error('No token received from server');
+      }
 
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(result.user);
 
+      console.log('Token stored successfully');
+
       return result.user;
     } catch (err) {
+      console.error('Login error:', err);
       const errorMessage = err.message || 'Login failed';
       setError(errorMessage);
       throw new Error(errorMessage);

@@ -68,12 +68,12 @@ const MyReviews = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">My Reviews</h1>
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">My Reviews</h1>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-md border-2 border-gray-200 overflow-hidden">
         {/* Header description */}
         <div className="p-6 border-b border-gray-200">
           {error ? (

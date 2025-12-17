@@ -76,44 +76,40 @@ const ManageUsers = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-4">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="mb-6">
         <div>
-          <h1 className="text-2xl font-semibold">Manage Users</h1>
-          <p className="text-sm text-gray-500">Search, filter, edit roles, and remove users</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Manage Users</h1>
+          <p className="text-sm text-gray-600 mt-1">Search, filter, and manage user roles</p>
         </div>
-        <button className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-          <FaPlus />
-          Add New User
-        </button>
       </div>
 
-      <div className="bg-white border rounded-xl p-4 mb-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-xl p-8 mb-6 border border-gray-100">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex-1">
-            <div className="input input-bordered w-full flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 text-gray-500"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <div className="relative">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by name or email"
-                className="w-full outline-none bg-transparent"
+                className="w-full pl-8 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="select select-bordered select-sm"
+              className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer font-medium transition-all"
             >
               <option>All</option>
               {Object.values(USER_ROLES).map(role => (
                 <option key={role} value={role}>{role}</option>
               ))}
             </select>
-            <span className="text-xs px-2 py-1 rounded bg-gray-100 border">{filteredUsers.length} users</span>
+            <div className="text-xs px-3 py-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 font-semibold">{filteredUsers.length} users</div>
           </div>
         </div>
       </div>
@@ -125,33 +121,33 @@ const ManageUsers = () => {
       )}
 
       {filteredUsers.length === 0 ? (
-        <div className="alert alert-info">
-          <span>No users found.</span>
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8 text-center">
+          <p className="text-blue-700 font-medium">No users found.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto bg-white border rounded-xl">
+        <div className="overflow-x-auto bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-xl border border-gray-100">
           <table className="table w-full">
-            <thead>
+            <thead className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
               <tr>
-                <th>User</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Joined</th>
-                <th className="text-right">Actions</th>
+                <th className="text-gray-700 font-bold">User</th>
+                <th className="text-gray-700 font-bold">Email</th>
+                <th className="text-gray-700 font-bold">Role</th>
+                <th className="text-gray-700 font-bold">Joined</th>
+                <th className="text-right text-gray-700 font-bold">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map(user => (
-                <tr key={user._id}>
+              {filteredUsers.map((user, idx) => (
+                <tr key={user._id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
                   <td>
                     <div className="flex items-center gap-3">
                       <div className="avatar">
-                        <div className="w-8 h-8 rounded-full">
-                          <img src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=0D8ABC&color=fff`} alt={user.displayName || user.email} />
+                        <div className="w-10 h-10 rounded-full ring ring-blue-200">
+                          <img src={user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || user.email)}&background=3B82F6&color=fff`} alt={user.displayName || user.email} />
                         </div>
                       </div>
                       <div>
-                        <div className="font-medium text-sm">{user.displayName || 'N/A'}</div>
+                        <div className="font-semibold text-sm text-gray-900">{user.displayName || 'N/A'}</div>
                       </div>
                     </div>
                   </td>
@@ -161,14 +157,14 @@ const ManageUsers = () => {
                       <select
                         value={editRole}
                         onChange={(e) => setEditRole(e.target.value)}
-                        className="select select-bordered select-sm"
+                        className="px-3 py-2 bg-white border border-blue-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                       >
                         {Object.values(USER_ROLES).map(role => (
                           <option key={role} value={role}>{role}</option>
                         ))}
                       </select>
                     ) : (
-                      <span className={`px-2 py-1 text-xs rounded ${
+                      <span className={`px-3 py-1.5 text-xs font-bold rounded-lg inline-block ${
                         (user.role || 'Student') === 'Admin' ? 'bg-red-100 text-red-700' :
                         (user.role || 'Student') === 'Moderator' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-blue-100 text-blue-700'
@@ -183,13 +179,13 @@ const ManageUsers = () => {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleRoleChange(user._id, editRole)}
-                          className="px-3 py-1 text-xs rounded bg-green-600 text-white hover:bg-green-700"
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-500 text-white hover:bg-green-600 transition-all shadow-sm"
                         >
                           Save
                         </button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="px-3 py-1 text-xs rounded border"
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-all"
                         >
                           Cancel
                         </button>
@@ -201,14 +197,14 @@ const ManageUsers = () => {
                             setEditingId(user._id);
                             setEditRole(user.role || 'Student');
                           }}
-                          className="p-2 rounded border hover:bg-gray-50"
+                          className="p-2 rounded-lg border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all font-bold"
                           title="Edit role"
                         >
                           <FaEdit />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(user._id)}
-                          className="p-2 rounded border hover:bg-gray-50 text-red-600"
+                          className="p-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-all font-bold"
                           title="Delete user"
                         >
                           <FaTrash />
@@ -225,20 +221,20 @@ const ManageUsers = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">Delete User?</h3>
-            <p className="py-4">Are you sure you want to delete this user? This action cannot be undone.</p>
-            <div className="modal-action">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 border border-gray-200">
+            <h3 className="font-bold text-xl text-gray-900 mb-2">Delete User?</h3>
+            <p className="text-gray-600 text-sm mb-6">Are you sure you want to delete this user? This action cannot be undone.</p>
+            <div className="flex gap-3">
               <button
                 onClick={() => handleDelete(showDeleteConfirm)}
-                className="btn btn-error"
+                className="flex-1 px-4 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition-all"
               >
                 Delete
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className="btn"
+                className="flex-1 px-4 py-3 rounded-lg bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-all"
               >
                 Cancel
               </button>

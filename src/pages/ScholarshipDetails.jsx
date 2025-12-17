@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { get } from '../utils/apiClient';
+import { get, post, patch } from '../utils/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { FaMapMarkerAlt, FaDollarSign, FaCalendarAlt, FaGraduationCap, FaStar } from 'react-icons/fa';
 
 const ScholarshipDetails = () => {
   const { id } = useParams();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   const [scholarship, setScholarship] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [reviewForm, setReviewForm] = useState({ ratingPoint: 0, reviewComment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     fetchScholarshipDetails();
@@ -45,6 +47,40 @@ const ScholarshipDetails = () => {
       return;
     }
     navigate(`/checkout/${id}`);
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewForm.reviewComment.trim()) {
+      alert('Please write a review comment');
+      return;
+    }
+    
+    setSubmittingReview(true);
+    try {
+      const reviewData = {
+        scholarshipId: id,
+        userName: user?.displayName || 'Anonymous',
+        userEmail: user?.email,
+        ratingPoint: reviewForm.ratingPoint,
+        reviewComment: reviewForm.reviewComment
+      };
+      
+      await post('/reviews', reviewData);
+      
+      // Refresh reviews
+      const reviewsResponse = await get(`/reviews/scholarship/${id}`);
+      setReviews(reviewsResponse.data || []);
+      
+      // Reset form
+      setReviewForm({ ratingPoint: 0, reviewComment: '' });
+      alert('Review submitted successfully!');
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      alert('Failed to submit review. Please try again.');
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   const averageRating = reviews.length
@@ -210,7 +246,7 @@ const ScholarshipDetails = () => {
 
         <div className='mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6'>
           <div className='lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm'>
-            <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center justify-between mb-6'>
               <div>
                 <p className='text-sm text-slate-500'>Reviews & Ratings</p>
                 <p className='text-2xl font-bold text-slate-900'>{averageRating.toFixed(1)} / 5.0</p>
@@ -220,6 +256,51 @@ const ScholarshipDetails = () => {
                   <FaStar key={i} className={i < Math.round(averageRating) ? 'text-amber-400' : 'text-slate-300'} />
                 ))}
               </div>
+            </div>
+
+            {/* Write Review Form */}
+            <div className='mb-8 rounded-xl border border-blue-200 bg-blue-50 p-6'>
+              <h4 className='text-lg font-semibold text-slate-900 mb-4'>Share Your Review</h4>
+              <form onSubmit={handleSubmitReview} className='space-y-4'>
+                <div>
+                  <label className='block text-sm font-medium text-slate-700 mb-2'>Your Rating</label>
+                  <div className='flex gap-2'>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type='button'
+                        onClick={() => setReviewForm({ ...reviewForm, ratingPoint: star })}
+                        className='focus:outline-none transition-transform hover:scale-110'
+                      >
+                        <FaStar
+                          className={`w-6 h-6 ${
+                            star <= reviewForm.ratingPoint ? 'text-amber-400' : 'text-slate-300'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium text-slate-700 mb-2'>Your Review</label>
+                  <textarea
+                    value={reviewForm.reviewComment}
+                    onChange={(e) => setReviewForm({ ...reviewForm, reviewComment: e.target.value })}
+                    placeholder='Share your experience with this scholarship...'
+                    rows='4'
+                    className='w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none bg-white text-slate-900'
+                  />
+                </div>
+
+                <button
+                  type='submit'
+                  disabled={submittingReview}
+                  className='w-full btn btn-primary btn-sm'
+                >
+                  {submittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </form>
             </div>
 
             {reviews.length > 0 ? (

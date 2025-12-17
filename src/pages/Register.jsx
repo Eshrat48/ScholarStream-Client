@@ -56,7 +56,9 @@ const Register = () => {
         setIsLoading(true);
 
         try {
-            await register(formData.name, formData.email, formData.password, formData.photoURL);
+            // Only include photoURL if it's not empty
+            const photoURL = formData.photoURL.trim() || null;
+            await register(formData.name, formData.email, formData.password, photoURL);
             // Redirect to profile page to complete profile information
             navigate('/dashboard/my-profile', { 
                 replace: true,
@@ -189,25 +191,25 @@ const Register = () => {
                         )}
 
                         {/* Register Form */}
-                        <form onSubmit={handleSubmit} className="space-y-3">
+                        <form onSubmit={handleSubmit} className="space-y-3" autoComplete="off">
                             {/* Name Field */}
                             <div>
                                 <label htmlFor="name" className="block text-xs lg:text-sm font-semibold text-gray-700 mb-1">Full Name</label>
-                                <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Enter your full name" required className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
+                                <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Enter your full name" required autoComplete="off" className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
                                 {errors.name && <span className="text-red-600 text-xs font-medium mt-0.5 block">{errors.name}</span>}
                             </div>
 
                             {/* Email Field */}
                             <div>
                                 <label htmlFor="email" className="block text-xs lg:text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@example.com" required className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
+                                <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@example.com" required autoComplete="off" className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
                                 {errors.email && <span className="text-red-600 text-xs font-medium mt-0.5 block">{errors.email}</span>}
                             </div>
 
                             {/* Photo URL Field */}
                             <div>
                                 <label htmlFor="photoURL" className="block text-xs lg:text-sm font-semibold text-gray-700 mb-1">Photo URL <span className="text-gray-500 font-normal text-xs">(Optional)</span></label>
-                                <input type="url" id="photoURL" name="photoURL" value={formData.photoURL} onChange={handleChange} placeholder="https://..." className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
+                                <input type="url" id="photoURL" name="photoURL" value={formData.photoURL} onChange={handleChange} placeholder="https://..." autoComplete="off" className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
                                 {errors.photoURL && <span className="text-red-600 text-xs font-medium mt-0.5 block">{errors.photoURL}</span>}
                             </div>
 
@@ -215,7 +217,7 @@ const Register = () => {
                             <div>
                                 <label htmlFor="password" className="block text-xs lg:text-sm font-semibold text-gray-700 mb-1">Password</label>
                                 <div className="relative">
-                                    <input type={showPassword ? "text" : "password"} id="password" name="password" value={formData.password} onChange={handleChange} placeholder="Create a password" required className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
+                                    <input type={showPassword ? "text" : "password"} id="password" name="password" value={formData.password} onChange={handleChange} placeholder="Create a password" required autoComplete="new-password" className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-200 text-gray-900 placeholder:text-gray-500" />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">{showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}</button>
                                 </div>
 
