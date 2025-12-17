@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router";
 import RootLayout from "../layouts/RootLayout.jsx";
 import DashboardLayout from "../layouts/DashboardLayout.jsx";
 import Home from "../pages/Home/Home/Home.jsx";
-import Login from "../pages/Login.jsx";
+import Login from "../pages/LogIn.jsx";
 import Register from "../pages/Register.jsx";
 import Error from "../pages/Error.jsx";
 import AllScholarships from "../pages/AllScholarships.jsx";
