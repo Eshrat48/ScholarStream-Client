@@ -21,7 +21,8 @@ const ManageUsers = () => {
     try {
       setLoading(true);
       const response = await get('/users');
-      setUsers(response.users || []);
+      // The backend returns { success, count, data }
+      setUsers((response && response.data) || []);
       setError('');
     } catch (err) {
       console.error('Error fetching users:', err);

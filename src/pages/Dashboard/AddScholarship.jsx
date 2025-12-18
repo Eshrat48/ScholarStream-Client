@@ -159,7 +159,7 @@ const AddScholarship = () => {
                   name="scholarshipCategory"
                   value={formData.scholarshipCategory}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900"
                 >
                   {Object.values(SCHOLARSHIP_CATEGORY).map(category => (
                     <option key={category} value={category}>{category}</option>
@@ -262,7 +262,7 @@ const AddScholarship = () => {
                   name="degree"
                   value={formData.degree}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900"
                 >
                   {Object.values(DEGREE_TYPES).map(degree => (
                     <option key={degree} value={degree}>{degree}</option>

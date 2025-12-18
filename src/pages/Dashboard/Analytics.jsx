@@ -85,15 +85,49 @@ const Analytics = () => {
   const seriesMax = useMemo(() => Math.max(10, ...(applicationsSeries || [])), [applicationsSeries]);
   const [hoveredBar, setHoveredBar] = useState(null);
   
-  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7'];
-  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 
+  // Dynamically generate labels to match backend data order
   const getLabels = () => {
-    if (timeRange === '7days') return dayLabels;
-    if (timeRange === '30days') return weekLabels;
-    return monthLabels;
+    const now = new Date();
+    if (timeRange === '7days') {
+      // Last 7 days, oldest to newest
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        days.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
+      }
+      return days;
+    }
+    if (timeRange === '30days') {
+      // Last 7 weeks, oldest to newest
+      const weeks = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i * 7);
+        // Show week number and year
+        const week = getISOWeek(d);
+        weeks.push(`W${week}`);
+      }
+      return weeks;
+    }
+    // Last 6 months, oldest to newest
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(d.toLocaleDateString('en-US', { month: 'short' }));
+    }
+    return months;
   };
+
+  // Helper for ISO week number
+  function getISOWeek(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7);
+    return weekNo;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -127,7 +161,7 @@ const Analytics = () => {
             <select 
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2.5 border border-blue-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 backdrop-blur-sm shadow-sm font-medium cursor-pointer"
+              className="px-4 py-2.5 border border-blue-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 backdrop-blur-sm shadow-sm font-medium cursor-pointer"
             >
               <option value="7days">Last 7 days</option>
               <option value="30days">Last 30 days</option>
@@ -205,15 +239,15 @@ const Analytics = () => {
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-white shadow-lg">
               <div className="text-xs opacity-90 font-medium">Total</div>
-              <div className="text-2xl font-bold mt-1">{applicationsSeries.reduce((a, b) => a + b, 0)}</div>
+              <div className="text-2xl font-bold mt-1">{String(applicationsSeries && applicationsSeries.length > 0 ? applicationsSeries.reduce((a, b) => a + b, 0) : 0)}</div>
             </div>
             <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-white shadow-lg">
               <div className="text-xs opacity-90 font-medium">Average</div>
-              <div className="text-2xl font-bold mt-1">{Math.round(applicationsSeries.reduce((a, b) => a + b, 0) / applicationsSeries.length)}</div>
+              <div className="text-2xl font-bold mt-1">{String(applicationsSeries && applicationsSeries.length > 0 ? Math.round(applicationsSeries.reduce((a, b) => a + b, 0) / applicationsSeries.length) : 0)}</div>
             </div>
             <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-4 text-white shadow-lg">
               <div className="text-xs opacity-90 font-medium">Peak</div>
-              <div className="text-2xl font-bold mt-1">{Math.max(...applicationsSeries)}</div>
+              <div className="text-2xl font-bold mt-1">{String(applicationsSeries && applicationsSeries.length > 0 ? Math.max(...applicationsSeries) : 0)}</div>
             </div>
           </div>
         </div>
