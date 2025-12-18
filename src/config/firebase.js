@@ -1,4 +1,7 @@
+
 import { initializeApp } from 'firebase/app';
+// DEBUG: Print all environment variables
+console.log('ENV', import.meta.env);
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
